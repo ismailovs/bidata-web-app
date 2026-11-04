@@ -29,9 +29,12 @@ export async function createApp(env = process.env, stripeFetch = fetch) {
     CREATE TABLE IF NOT EXISTS limits(key TEXT PRIMARY KEY,count INTEGER,reset INTEGER);`);
   const cookieName = secure ? '__Host-bidata' : 'bidata';
   const priceIDs = { monthly: env.STRIPE_PRICE_MONTHLY, yearly: env.STRIPE_PRICE_YEARLY };
-  const billingConfigured = env.PAYMENTS_ENABLED === 'true' && env.DATA_MODE === 'live' && !!env.STRIPE_SECRET_KEY &&
+  const billingMode = ['test','live'].includes(env.BILLING_MODE) ? env.BILLING_MODE : 'off';
+  const keyMatchesMode = billingMode !== 'off' && (env.STRIPE_SECRET_KEY || '').startsWith(billingMode === 'test' ? 'sk_test_' : 'sk_live_');
+  const legalConfigured = httpsURL(env.PRIVACY_URL) && httpsURL(env.TERMS_URL) && emailOK(env.SUPPORT_EMAIL);
+  const billingConfigured = env.PAYMENTS_ENABLED === 'true' && keyMatchesMode &&
     Object.values(priceIDs).every(p => /^price_[A-Za-z0-9]+$/.test(p || '')) &&
-    httpsURL(env.PRIVACY_URL) && httpsURL(env.TERMS_URL) && emailOK(env.SUPPORT_EMAIL);
+    (billingMode === 'test' || (env.DATA_MODE === 'live' && legalConfigured));
   const locks = new Map();
   async function locked(id, fn) {
     if (locks.has(id)) fail(409, 'Another billing request is in progress.');
@@ -39,7 +42,7 @@ export async function createApp(env = process.env, stripeFetch = fetch) {
     try { return await fn(); } finally { locks.delete(id); }
   }
   async function stripe(path, method = 'GET', params = {}, idempotency) {
-    if (!env.STRIPE_SECRET_KEY) fail(503, 'Billing is not configured.');
+    if (!keyMatchesMode) fail(503, 'Billing mode and API key must match.');
     const query = new URLSearchParams(params);
     const response = await stripeFetch(`https://api.stripe.com/v1/${path}${method === 'GET' ? '?' + query : ''}`, {
       method, signal: AbortSignal.timeout(10000),
@@ -52,11 +55,11 @@ export async function createApp(env = process.env, stripeFetch = fetch) {
     return response.json();
   }
   async function entitlement(user) {
-    if (!user?.customer || !env.STRIPE_SECRET_KEY) return false;
+    if (!user?.customer || !keyMatchesMode) return false;
     let after;
     for (let page = 0; page < 10; page++) {
       const result = await stripe('subscriptions', 'GET', { customer: user.customer, status: 'all', limit: '100', ...(after ? { starting_after: after } : {}) });
-      if (result.data.some(s => ['active', 'trialing'].includes(s.status) && !s.pause_collection &&
+      if (result.data.some(s => ['active', 'trialing'].includes(s.status) && s.livemode === (billingMode === 'live') && !s.pause_collection &&
         s.items.data.some(i => Object.values(priceIDs).includes(i.price.id)))) return true;
       if (!result.has_more) return false;
       after = result.data.at(-1)?.id;
@@ -119,7 +122,7 @@ export async function createApp(env = process.env, stripeFetch = fetch) {
         if (req.headers.origin !== origin) fail(403, 'Origin not allowed.');
         rate('write:' + req.socket.remoteAddress, 120, 60);
       }
-      if (path === '/api/config' && req.method === 'GET') return json(res, 200, { dataMode: env.DATA_MODE === 'live' ? 'live' : 'sample', paymentsEnabled: billingConfigured, privacyUrl: httpsURL(env.PRIVACY_URL) ? env.PRIVACY_URL : null, termsUrl: httpsURL(env.TERMS_URL) ? env.TERMS_URL : null, supportEmail: emailOK(env.SUPPORT_EMAIL) ? env.SUPPORT_EMAIL : null });
+      if (path === '/api/config' && req.method === 'GET') return json(res, 200, { dataMode: env.DATA_MODE === 'live' ? 'live' : 'sample', paymentsEnabled: billingConfigured, billingMode, privacyUrl: httpsURL(env.PRIVACY_URL) ? env.PRIVACY_URL : null, termsUrl: httpsURL(env.TERMS_URL) ? env.TERMS_URL : null, supportEmail: emailOK(env.SUPPORT_EMAIL) ? env.SUPPORT_EMAIL : null });
       if (path === '/api/tenders' && req.method === 'GET') {
         const data = await feed(); const q = (url.searchParams.get('q') || '').slice(0, 200).toLocaleLowerCase();
         data.tenders = data.tenders.filter(t => !q || `${t.title} ${t.buyer} ${t.region}`.toLocaleLowerCase().includes(q));
@@ -195,14 +198,14 @@ export async function createApp(env = process.env, stripeFetch = fetch) {
         if (!billingConfigured) return json(res, 200, []);
         const plans = await Promise.all(Object.entries(priceIDs).map(async ([id, price]) => {
           const p = await stripe('prices/' + price);
-          if (!p.active || p.type !== 'recurring' || !Number.isInteger(p.unit_amount) || p.recurring.interval_count !== 1 || p.recurring.interval !== (id === 'monthly' ? 'month' : 'year')) fail(503, 'Subscription prices need configuration.');
+          if (p.livemode !== (billingMode === 'live') || !p.active || p.type !== 'recurring' || !Number.isInteger(p.unit_amount) || p.recurring.interval_count !== 1 || p.recurring.interval !== (id === 'monthly' ? 'month' : 'year')) fail(503, 'Subscription prices need configuration.');
           return { id, amount: p.unit_amount, currency: p.currency, interval: p.recurring.interval };
         })); return json(res, 200, plans);
       }
       if (path === '/api/checkout' && req.method === 'POST') {
         const user = requireUser(req);
         if (!billingConfigured) fail(503, 'Payments are not enabled yet.');
-        if ((await feed()).mode !== 'live') fail(503, 'Live feed required.');
+        if (billingMode === 'live' && (await feed()).mode !== 'live') fail(503, 'Live feed required for real charges.');
         const { plan } = await body(req); if (!Object.hasOwn(priceIDs, plan)) fail(400, 'Unknown plan.');
         return await locked(user.id, async () => {
           if (await entitlement(user)) fail(409, 'You already have a Pro subscription. Use subscription management.');
@@ -216,8 +219,9 @@ export async function createApp(env = process.env, stripeFetch = fetch) {
             mode: 'subscription', customer: user.customer, client_reference_id: user.id,
             'line_items[0][price]': priceIDs[plan], 'line_items[0][quantity]': '1',
             success_url: origin + '/?checkout=returned#plans', cancel_url: origin + '/#plans',
-            'subscription_data[metadata][bidata_user]': user.id, 'consent_collection[terms_of_service]': 'required'
+            'subscription_data[metadata][bidata_user]': user.id, ...(legalConfigured ? { 'consent_collection[terms_of_service]': 'required' } : {})
           }, 'bidata-checkout-' + user.id + '-' + plan + '-' + Math.floor(Date.now()/1800000));
+          if (checkout.livemode !== (billingMode === 'live')) fail(502, 'Checkout billing mode mismatch.');
           return json(res, 200, { url: checkout.url });
         });
       }

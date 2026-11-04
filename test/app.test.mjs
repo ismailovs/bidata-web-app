@@ -49,8 +49,8 @@ test('mutation CSRF, password validation, anonymous access and authentication ra
  let status;for(let i=0;i<22;i++)status=(await call('/api/login',{method:'POST',data:{email:'x@example.test',password:'incorrect-long-password'}})).status;
  assert.equal(status,429);
 });
-test('sample data cannot activate checkout; success query never grants Pro',async t=>{
- const {call,register}=await fixture(t,{PAYMENTS_ENABLED:'true',STRIPE_SECRET_KEY:'test-not-a-key',STRIPE_PRICE_MONTHLY:'price_month',STRIPE_PRICE_YEARLY:'price_year',PRIVACY_URL:'https://example.test/privacy',TERMS_URL:'https://example.test/terms',SUPPORT_EMAIL:'help@example.test'});
+test('sample data cannot activate real checkout; success query never grants Pro',async t=>{
+ const {call,register}=await fixture(t,{PAYMENTS_ENABLED:'true',BILLING_MODE:'live',STRIPE_SECRET_KEY:'sk_live_fake',STRIPE_PRICE_MONTHLY:'price_month',STRIPE_PRICE_YEARLY:'price_year',PRIVACY_URL:'https://example.test/privacy',TERMS_URL:'https://example.test/terms',SUPPORT_EMAIL:'help@example.test'});
  const cookie=await register();assert.equal((await (await call('/api/config')).json()).paymentsEnabled,false);
  assert.equal((await call('/api/checkout',{method:'POST',data:{plan:'monthly'},cookie})).status,503);
  await call('/?checkout=returned');assert.equal((await (await call('/api/me',{cookie})).json()).pro,false);
@@ -72,12 +72,12 @@ test('subscription checkout binds customer server-side and only verified allowed
  let active=false,allowed=true,paused=false;const calls=[];
  const stripeFetch=async(url,options)=>{calls.push({url,options});const path=new URL(url).pathname;let data;
  if(path==='/v1/customers')data={id:'cus_test'};
- else if(path==='/v1/subscriptions')data={data:active?[{status:'active',pause_collection:paused?{}:null,items:{data:[{price:{id:allowed?'price_month':'price_other'}}]}}]:[],has_more:false};
- else if(path==='/v1/checkout/sessions')data=options.method==='POST'?{url:'https://checkout.stripe.com/test'}:{data:[]};
+ else if(path==='/v1/subscriptions')data={data:active?[{status:'active',livemode:false,pause_collection:paused?{}:null,items:{data:[{price:{id:allowed?'price_month':'price_other'}}]}}]:[],has_more:false};
+ else if(path==='/v1/checkout/sessions')data=options.method==='POST'?{url:'https://checkout.stripe.com/test',livemode:false}:{data:[]};
  else if(path==='/v1/billing_portal/sessions')data={url:'https://billing.stripe.com/test'};
- else if(path.startsWith('/v1/prices/'))data={active:true,type:'recurring',unit_amount:2000,currency:'usd',recurring:{interval:path.endsWith('month')?'month':'year',interval_count:1}};
+ else if(path.startsWith('/v1/prices/'))data={livemode:false,active:true,type:'recurring',unit_amount:2000,currency:'usd',recurring:{interval:path.endsWith('month')?'month':'year',interval_count:1}};
  else throw Error('Unexpected mock API path');return new Response(JSON.stringify(data));};
- const {call,register}=await fixture(t,{DATA_MODE:'live',TENDERS_FILE:file,PAYMENTS_ENABLED:'true',STRIPE_SECRET_KEY:'test-not-a-key',STRIPE_PRICE_MONTHLY:'price_month',STRIPE_PRICE_YEARLY:'price_year',PRIVACY_URL:'https://example.test/privacy',TERMS_URL:'https://example.test/terms',SUPPORT_EMAIL:'help@example.test'},stripeFetch);
+ const {call,register}=await fixture(t,{DATA_MODE:'live',TENDERS_FILE:file,PAYMENTS_ENABLED:'true',BILLING_MODE:'test',STRIPE_SECRET_KEY:'sk_test_fake',STRIPE_PRICE_MONTHLY:'price_month',STRIPE_PRICE_YEARLY:'price_year',PRIVACY_URL:'https://example.test/privacy',TERMS_URL:'https://example.test/terms',SUPPORT_EMAIL:'help@example.test'},stripeFetch);
  const cookie=await register();const checkout=await call('/api/checkout',{method:'POST',data:{plan:'monthly',customer:'cus_attacker',price:'price_other'},cookie});assert.equal(checkout.status,200);
  const params=calls.find(c=>c.url.includes('/checkout/sessions')&&c.options.method==='POST').options.body;
  assert.equal(params.get('customer'),'cus_test');assert.equal(params.get('line_items[0][price]'),'price_month');
@@ -87,4 +87,21 @@ test('subscription checkout binds customer server-side and only verified allowed
  allowed=false;assert.equal((await call('/api/export',{cookie})).status,403);
  allowed=true;paused=true;assert.equal((await call('/api/export',{cookie})).status,403);
  paused=false;active=false;assert.equal((await (await call('/api/me',{cookie})).json()).pro,false);
+});
+test('sample tenders allow test checkout only, with matching Stripe environment',async t=>{
+ const calls=[];
+ const stripeFetch=async(url,options)=>{calls.push(url);const path=new URL(url).pathname;
+ if(path==='/v1/customers')return new Response(JSON.stringify({id:'cus_test'}));
+ if(path==='/v1/subscriptions')return new Response(JSON.stringify({data:[],has_more:false}));
+ if(path==='/v1/checkout/sessions')return new Response(JSON.stringify(options.method==='POST'?{url:'https://checkout.stripe.com/test',livemode:false}:{data:[]}));
+ throw Error('Unexpected request');};
+ const settings={PAYMENTS_ENABLED:'true',BILLING_MODE:'test',STRIPE_SECRET_KEY:'sk_test_fake',STRIPE_PRICE_MONTHLY:'price_month',STRIPE_PRICE_YEARLY:'price_year'};
+ const {call,register}=await fixture(t,settings,stripeFetch);const cookie=await register();
+ const config=await(await call('/api/config')).json();assert.equal(config.paymentsEnabled,true);assert.equal(config.billingMode,'test');assert.equal(config.dataMode,'sample');assert.equal(JSON.stringify(config).includes('sk_test'),false);
+ assert.equal((await call('/api/checkout',{method:'POST',data:{plan:'monthly'},cookie})).status,200);
+ assert.ok(calls.length>0);
+ const mismatch=await fixture(t,{...settings,STRIPE_SECRET_KEY:'sk_live_fake'},()=>{throw Error('Must never call provider with mismatched key');});
+ assert.equal((await(await mismatch.call('/api/config')).json()).paymentsEnabled,false);
+ const live=await fixture(t,{...settings,BILLING_MODE:'live',STRIPE_SECRET_KEY:'sk_live_fake',PRIVACY_URL:'https://example.test/privacy',TERMS_URL:'https://example.test/terms',SUPPORT_EMAIL:'help@example.test'});
+ assert.equal((await(await live.call('/api/config')).json()).paymentsEnabled,false);
 });
