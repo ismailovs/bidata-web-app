@@ -12,3 +12,5 @@ jobs:
           node-version: '24'
       - run: npm run check
       - run: npm test
+      - run: bash -n scripts/setup-github-deploy.sh
+      - run: python3 -m unittest discover -s test -p 'test_deploy.py'

@@ -88,3 +88,7 @@ See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Keep this application separate fro
 ## Direction inspired by Autopilot
 
 See [docs/PRODUCT_DIRECTION.md](docs/PRODUCT_DIRECTION.md) for the source-backed priorities and the boundary between current features and future marketplace integrations.
+
+## Automated updates from GitHub
+
+See [docs/GITHUB_DEPLOYMENT.md](docs/GITHUB_DEPLOYMENT.md). The workflow validates main-branch code, uses a forced-command deployment account with pinned SSH host identity, preserves server settings/data and attempts code rollback on failed server health checks. One-time server setup, GitHub environment secrets, HTTPS and an explicit enable variable are required. Nothing deploys from feature branches or pull requests.

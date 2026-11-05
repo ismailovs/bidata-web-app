@@ -1,0 +1,61 @@
+name: Deploy Bidata to Hetzner
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bidata-hetzner
+  cancel-in-progress: false
+jobs:
+  validate:
+    if: github.ref == 'refs/heads/main' && vars.BIDATA_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm run check
+      - run: npm test
+      - name: Validate deployment helpers
+        run: |
+          bash -n scripts/setup-github-deploy.sh
+          python3 -m unittest discover -s test -p 'test_deploy.py'
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: hetzner
+      url: https://app.bidata.uz
+    steps:
+      - name: Deploy exact validated main commit
+        shell: bash
+        env:
+          DEPLOY_KEY: ${{ secrets.HETZNER_SSH_KEY }}
+          HOST_KEYS: ${{ secrets.HETZNER_KNOWN_HOSTS }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test -n "$DEPLOY_KEY" && test -n "$HOST_KEYS"
+          [[ "$COMMIT_SHA" =~ ^[0-9a-f]{40}$ ]]
+          umask 077
+          deploy_tmp=$(mktemp -d)
+          trap 'rm -rf "$deploy_tmp"' EXIT
+          printf '%s\n' "$DEPLOY_KEY" > "$deploy_tmp/key"
+          printf '%s\n' "$HOST_KEYS" > "$deploy_tmp/known_hosts"
+          unset DEPLOY_KEY HOST_KEYS
+          ssh -T -i "$deploy_tmp/key" \
+            -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$deploy_tmp/known_hosts" \
+            -o GlobalKnownHostsFile=/dev/null \
+            -o ConnectTimeout=15 \
+            bidata-deploy@188.245.246.102 "deploy $COMMIT_SHA"
+      - name: Verify public HTTPS configuration
+        run: curl --fail --show-error --retry 3 --retry-delay 3 --max-time 20 https://app.bidata.uz/api/config
