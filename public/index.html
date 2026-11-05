@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="uz-Cyrl">
+<head>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+ <meta name="theme-color" content="#081321"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Bidata">
+ <meta name="description" content="Ўзбекистон тендерлари ва харидлари — Bidata мобил иловаси.">
+ <title>Bidata — Бизнес имкониятлари</title>
+ <link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icons/apple-touch-icon.png"><link rel="icon" href="/icons/icon.svg" type="image/svg+xml"><link rel="stylesheet" href="/style.css">
+ <script src="/app.js" type="module"></script>
+</head>
+<body>
+ <aside class="sidebar">
+  <a class="brand" href="#market"><span class="brand-icon">b<span>↗</span></span>bidata<span class="brand-dot">.uz</span></a>
+  <p class="eyebrow" data-t="workspace">БИЗНЕС МАЙДОНИ</p>
+  <nav aria-label="Асосий меню">
+   <a href="#market" data-nav="market"><span>▦</span><span data-t="market">Имкониятлар</span></a>
+   <a href="#saved" data-nav="saved"><span>♡</span><span data-t="saved">Сақланганлар</span></a>
+   <a href="#plans" data-nav="plans"><span>✧</span><span>Bidata Pro</span></a>
+   <a href="#account" data-nav="account"><span>◎</span><span data-t="account">Ҳисоб</span></a>
+  </nav>
+  <div class="sidebar-bottom"><p data-t="tagline">Имкониятни кутманг.<br>Биринчи бўлиб топинг.</p><a href="https://bidata.uz" target="_blank" rel="noopener">bidata.uz ↗</a></div>
+ </aside>
+ <div class="shell">
+  <header><span class="mobile-brand">bidata<span>.uz</span></span><span class="header-label" data-t="platform">Ўзбекистон харидлар платформаси</span><div class="header-actions"><button id="language" class="quiet" aria-label="Switch language">РУ</button><button id="install" class="quiet" data-t="install">Иловани ўрнатиш ↗</button><button id="auth-button" class="avatar" data-t="signin">Кириш</button></div></header>
+  <main id="main">
+   <section id="market-view" class="view">
+    <div class="intro"><div><p class="eyebrow" data-t="overview">СИЗНИНГ БОЗОРИНГИЗ. СИЗНИНГ ИМКОНИЯТИНГИЗ.</p><h1 data-t="headline">Кейинги имкониятингизни топинг.</h1><p class="subtitle" data-t="subtitle">Тендерлар ва харидлар — бизнесингиз учун бир жойда.</p></div><div class="live-badge" id="data-badge">DEMO</div></div>
+    <div id="status-banner" class="notice" role="status"></div>
+    <div class="metrics"><article><span data-t="tendercount">Кўрсатилаётган тендерлар</span><strong id="metric-count">—</strong><small data-t="allcategories">Барча йўналишлар</small></article><article><span data-t="totalvalue">Жами бошланғич қиймат</span><strong id="metric-value">—</strong><small>UZS</small></article><article class="accent-metric"><span data-t="savedcount">Сақланган имкониятлар</span><strong id="metric-saved">0</strong><a href="#saved" data-t="openSaved">Рўйхатни очиш ↗</a></article></div>
+    <div class="section-heading"><h2 data-t="opportunities">Харид имкониятлари</h2><button id="refresh" class="quiet" data-t="refresh">Янгилаш ↻</button></div>
+    <div class="filters"><label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" data-placeholder="search" placeholder="Тендер, товар ёки ташкилотни қидиринг" aria-label="Тендер қидириш"></label><select id="region" aria-label="Ҳудуд"></select><select id="sort" aria-label="Саралаш"><option value="deadline" data-t="deadlineSort">Муддати яқин</option><option value="amount" data-t="amountSort">Қиймати юқори</option></select></div>
+    <div class="productivity"><button id="matches-toggle" class="quiet" data-t="matches">Менга мос харидлар</button><a href="#account" class="fine" data-t="configure">Компания йўналишини созлаш ↗</a><span id="freshness" class="fine"></span></div>
+    <div id="categories" class="chips" aria-label="Категориялар"></div>
+    <div id="tenders" class="tender-grid" aria-live="polite"></div>
+   </section>
+   <section id="saved-view" class="view" hidden><p class="eyebrow">BIDATA</p><h1 data-t="saved">Сақланганлар</h1><p class="subtitle" data-t="savedDesc">Қизиқарли имкониятларингиз шу ерда.</p><div id="saved-tenders" class="tender-grid"></div></section>
+   <section id="plans-view" class="view" hidden><p class="eyebrow">BIDATA PRO</p><h1 data-t="plansTitle">Бозорни кенгроқ кўринг.</h1><p class="subtitle" data-t="plansDesc">Тендерлар билан ишлаш учун кўпроқ имконият.</p><div class="plan-grid"><article class="plan"><span class="eyebrow">BIDATA</span><h2 data-t="free">Бепул</h2><p data-t="freeDesc">Бозорни ўрганишни бошланг.</p><ul><li data-t="free1">Тендерлар қидируви ва фильтрлар</li><li data-t="free2">Шахсий сақланганлар рўйхати</li><li data-t="free3">Иловани бош экранга қўшиш</li></ul><a href="#market" class="button secondary" data-t="browse">Тендерларни кўриш</a></article><article class="plan featured"><span class="eyebrow">BIDATA PRO</span><h2 data-t="proTitle">Маълумотдан қарорга.</h2><p data-t="proDesc">Барча бепул имкониятлар ва жонли тендерларни CSV файлга экспорт қилиш.</p><div id="price-options"></div><p class="fine" data-t="renewal">Обуналар автоматик янгиланади. Обунани бошқариш орқали бекор қилиш мумкин.</p><button id="manage-billing" class="quiet" data-t="manage">Обунани бошқариш</button><a id="export" class="button secondary" href="/api/export" hidden data-t="export">CSV экспорт</a></article></div><div id="legal" class="fine"></div></section>
+   <section id="account-view" class="view" hidden><p class="eyebrow">BIDATA</p><h1 data-t="account">Ҳисоб</h1><div id="account-panel" class="panel"></div></section>
+   <footer><span>© 2026 bidata.uz</span><span data-t="footer">Маълумот билан олдинда бўлинг.</span></footer>
+  </main>
+ </div>
+ <nav class="bottom-nav" aria-label="Мобил меню"><a href="#market" data-nav="market"><span>▦</span><small data-t="market">Имкониятлар</small></a><a href="#saved" data-nav="saved"><span>♡</span><small data-t="saved">Сақланганлар</small></a><a href="#plans" data-nav="plans"><span>✧</span><small>Pro</small></a><a href="#account" data-nav="account"><span>◎</span><small data-t="account">Ҳисоб</small></a></nav>
+ <dialog id="auth-dialog"><form id="auth-form"><div class="dialog-top"><span class="brand">bidata<span class="brand-dot">.uz</span></span><button type="button" class="close" data-close="auth-dialog" aria-label="Close">×</button></div><h2 id="auth-title"></h2><p class="fine" data-t="authDesc">Сақланган тендерларингизга исталган қурилмадан киринг.</p><label>Email<input id="email" type="email" required autocomplete="email" maxlength="254"></label><label><span data-t="password">Пароль</span><input id="password" type="password" required minlength="12" maxlength="128" autocomplete="current-password"></label><p class="fine" data-t="passwordHint">Камида 12 та белги. Махсус тест паролидан фойдаланинг: бу дастлабки версия.</p><p id="auth-error" role="alert"></p><button id="auth-submit" class="button" type="submit"></button><button id="auth-toggle" class="quiet" type="button"></button></form></dialog>
+ <dialog id="install-dialog"><div class="dialog-top"><h2 data-t="installTitle">Bidata доим ёнингизда.</h2><button class="close" data-close="install-dialog" aria-label="Close">×</button></div><p data-t="installDesc">iPhone Safari браузерида:</p><ol><li data-t="install1">Улашиш (Share) тугмасини босинг.</li><li data-t="install2">«Бош экранга қўшиш» (Add to Home Screen) ни танланг.</li><li data-t="install3">«Қўшиш» (Add) ни босинг.</li></ol><p class="fine" data-t="installOther">Android ёки компьютерда браузернинг «Иловани ўрнатиш» менюсидан фойдаланинг.</p></dialog>
+ <dialog id="detail-dialog"><div class="dialog-top"><h2 data-t="details">Тендер тафсилотлари</h2><button class="close" data-close="detail-dialog" aria-label="Close">×</button></div><div id="detail-content"></div></dialog>
+ <div id="toast" class="toast" role="status" hidden></div>
+</body></html>
