@@ -11,13 +11,13 @@ concurrency:
 jobs:
   validate:
     if: github.ref == 'refs/heads/main' && vars.BIDATA_DEPLOY_ENABLED == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '24'
       - run: npm run check
@@ -28,7 +28,7 @@ jobs:
           python3 -m unittest discover -s test -p 'test_deploy.py'
   deploy:
     needs: validate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     environment:
       name: hetzner
@@ -47,9 +47,17 @@ jobs:
           umask 077
           deploy_tmp=$(mktemp -d)
           trap 'rm -rf "$deploy_tmp"' EXIT
-          printf '%s\n' "$DEPLOY_KEY" > "$deploy_tmp/key"
+          printf '%s\n' "$DEPLOY_KEY" | tr -d '\r' > "$deploy_tmp/key"
           printf '%s\n' "$HOST_KEYS" > "$deploy_tmp/known_hosts"
           unset DEPLOY_KEY HOST_KEYS
+          if ! ssh-keygen -y -P '' -f "$deploy_tmp/key" >/dev/null 2>&1; then
+            echo "::error::HETZNER_SSH_KEY must contain the complete unencrypted PRIVATE key, including BEGIN/END lines and real line breaks. Replace it in the hetzner environment secrets."
+            exit 1
+          fi
+          if ! ssh-keygen -F 188.245.246.102 -f "$deploy_tmp/known_hosts" >/dev/null 2>&1; then
+            echo "::error::HETZNER_KNOWN_HOSTS must contain the verified host-key line starting with 188.245.246.102."
+            exit 1
+          fi
           ssh -T -i "$deploy_tmp/key" \
             -o IdentitiesOnly=yes -o BatchMode=yes \
             -o StrictHostKeyChecking=yes \
