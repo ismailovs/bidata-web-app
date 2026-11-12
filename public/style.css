@@ -1,6 +1,6 @@
 :root {
   color-scheme: light;
-  --bg: #f6f8fb; --surface: #ffffff; --edge: #e1e7ef;
+  --bg: #ffffff; --surface: #ffffff; --edge: #e1e7ef;
   --muted: #5d6b7d; --text: #172438; --blue: #205ecb; --mint: #157357;
   --active: #edf4ff; --hover: #f0f4f9; --button: #2563eb;
   --notice-bg: #fff9e9; --notice-text: #775719; --notice-edge: #eddfb6;
@@ -40,7 +40,7 @@ header { max-width: 1170px; margin: auto; min-height: 68px; display: flex; align
 .quiet, .avatar { border: 1px solid var(--edge); background: var(--surface); border-radius: 8px; color: var(--text); padding: 8px 12px; font-size: 12px; min-height: 42px; }
 .quiet:hover, .avatar:hover { background: var(--hover); }
 .avatar { color: var(--blue); font-weight: 600; }
-#theme-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+#theme-toggle { border-color: #b91c3270; display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
 .theme-icon { font-size: 18px; line-height: 1; }
 .mobile-brand { display: none; }
 main { max-width: 1170px; margin: auto; padding: 20px 25px 30px; }
