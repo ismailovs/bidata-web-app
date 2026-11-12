@@ -236,7 +236,7 @@ export async function createApp(env = process.env, stripeFetch = fetch) {
       const file = resolve(root, 'public', relative);
       if (!file.startsWith(resolve(root, 'public') + '/') || relative.includes('\0')) fail(404, 'Not found.');
       let content; try { content = await readFile(file); } catch { fail(404, 'Not found.'); }
-      const types = { '.html':'text/html; charset=utf-8', '.css':'text/css', '.js':'text/javascript', '.webmanifest':'application/manifest+json', '.svg':'image/svg+xml', '.png':'image/png' };
+      const types = { '.html':'text/html; charset=utf-8', '.css':'text/css', '.js':'text/javascript', '.webmanifest':'application/manifest+json', '.svg':'image/svg+xml', '.png':'image/png', '.jpg':'image/jpeg' };
       res.writeHead(200, { 'Content-Type': types[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-cache', ...(path === '/sw.js' ? { 'Service-Worker-Allowed':'/' } : {}) });
       res.end(req.method === 'HEAD' ? undefined : content);
     } catch (error) {
