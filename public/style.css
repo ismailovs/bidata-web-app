@@ -25,7 +25,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 [hidden] { display: none !important; }
 .sidebar { background: var(--surface); border-bottom: 1px solid var(--edge); padding: 16px max(24px, calc((100vw - 1120px) / 2)); display: flex; align-items: center; justify-content: space-between; gap: 30px; }
 .brand { display: flex; align-items: center; font-size: 26px; font-weight: 750; letter-spacing: -1px; white-space: nowrap; }
-.brand-dot, .mobile-brand span { color: var(--blue); }
+.brand-dot, .mobile-brand span { color: #b91c32; }
 .brand-icon { display: block; flex: none; margin-right: 8px; border-radius: 9px; object-fit: contain; }
 .sidebar > .eyebrow, .sidebar-bottom, .intro .eyebrow { display: none; }
 .sidebar nav { display: flex; gap: 6px; }
