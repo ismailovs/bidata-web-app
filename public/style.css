@@ -184,3 +184,10 @@ dialog .quiet { width: 100%; margin-top: 12px; }
 @media (prefers-reduced-motion: no-preference) {
   .tender, .quiet, .chip { transition: border-color .15s; }
 }
+
+.sidebar .brand { font-size: 34px; line-height: 1.25; }
+.brand-group .header-label { margin-left: 50px; }
+@media (max-width: 760px) {
+  .mobile-brand { font-size: 28px; line-height: 1.25; }
+  .brand-group .header-label { margin-left: 42px; font-size: 10px; }
+}
