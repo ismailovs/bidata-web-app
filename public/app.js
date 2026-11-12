@@ -99,7 +99,6 @@ function render() {
  document.querySelectorAll('[data-t]').forEach(el=>el.textContent=t(el.dataset.t));
  document.querySelectorAll('[data-placeholder]').forEach(el=>el.placeholder=t(el.dataset.placeholder));
  $('#language').textContent=lang==='uz'?'РУ':'ЎЗ';$('#auth-button').textContent=state.user?state.user.email.slice(0,1).toUpperCase():t('signin');
- $('#data-badge').textContent=state.mode==='live'?'LIVE':'DEMO';
  $('#status-banner').textContent=state.error || t(state.mode==='live'?'live':'sample');
  $('#freshness').textContent=state.checked ? (state.updatedAt?t('updated')+' '+new Date(state.updatedAt).toLocaleString():t('checked')+' '+new Date(state.checked).toLocaleTimeString()) : '';
  const old=$('#region').value;$('#region').replaceChildren();const first=node('option','',t('regions'));first.value='';$('#region').append(first);
