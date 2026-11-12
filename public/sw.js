@@ -1,4 +1,4 @@
-const CACHE = 'bidata-shell-v6';
+const CACHE = 'bidata-shell-v7';
 const SHELL = ['/', '/theme.js', '/app.js', '/style.css', '/manifest.webmanifest', '/icons/bidata-red-192.png', '/icons/bidata-red-512.png', '/icons/bidata-red-180.png'];
 self.addEventListener('install', event => { event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL))); });
 self.addEventListener('activate', event => {
