@@ -154,6 +154,8 @@ function render() {
  $('#auth-button').textContent=state.user?state.user.email.slice(0,1).toUpperCase():t('signin');
  $('#status-banner').textContent = state.error || '';
  $('#status-banner').hidden = !state.error;
+ $('#refresh').title = lang === 'ru' ? 'Обновить' : 'Янгилаш';
+ $('#refresh').setAttribute('aria-label', $('#refresh').title);
  $('#freshness').textContent=state.checked ? (state.updatedAt?t('updated')+' '+new Date(state.updatedAt).toLocaleString():t('checked')+' '+new Date(state.checked).toLocaleTimeString()) : '';
  const old=$('#region').value;$('#region').replaceChildren();const first=node('option','',t('regions'));first.value='';$('#region').append(first);
  for (const [id, uz, ru] of regions) {
@@ -190,8 +192,9 @@ if(window.matchMedia('(display-mode: standalone)').matches||navigator.standalone
 for(const button of document.querySelectorAll('[data-close]'))button.onclick=()=>document.getElementById(button.dataset.close).close();
 window.addEventListener('hashchange',route);
 async function loadAccount(){state.user=await api('me');if(state.user){[state.saved,state.profile,state.workflow]=await Promise.all([api('bookmarks'),api('profile'),api('workflow')]);}else{state.saved=[];state.profile={keywords:'',region:''};state.workflow=[];}}
+$('#refresh').onclick = () => refreshFeed();
 let refreshing=false;
-async function refreshFeed(){if(refreshing)return;refreshing=true;try{const feed=await api('tenders');const old=new Set(state.tenders.map(t=>t.id));const newCount=old.size?feed.tenders.filter(x=>!old.has(x.id)&&(!state.matches||match(x))).length:0;state.tenders=feed.tenders;state.mode=feed.mode;state.updatedAt=feed.updatedAt;state.checked=Date.now();state.error=null;if(newCount)toast(t('newTenders')+' '+newCount);}catch(e){state.tenders=[];state.error=navigator.onLine?e.message:t('offline');}finally{refreshing=false;render();}}
+async function refreshFeed(){if(refreshing)return;refreshing=true;$('#refresh').disabled=true;try{const feed=await api('tenders');const old=new Set(state.tenders.map(t=>t.id));const newCount=old.size?feed.tenders.filter(x=>!old.has(x.id)&&(!state.matches||match(x))).length:0;state.tenders=feed.tenders;state.mode=feed.mode;state.updatedAt=feed.updatedAt;state.checked=Date.now();state.error=null;if(newCount)toast(t('newTenders')+' '+newCount);}catch(e){state.tenders=[];state.error=navigator.onLine?e.message:t('offline');}finally{refreshing=false;$('#refresh').disabled=false;render();}}
 async function start(){try{state.config=await api('config');state.mode=state.config.dataMode;await loadAccount();try{state.plans=await api('plans');}catch(e){toast(e.message);}}catch(e){toast(e.message);}await refreshFeed();if(new URLSearchParams(location.search).has('checkout'))toast(t('paymentReturn'));}
 render();start();
 setInterval(()=>{if(document.visibilityState==='visible')refreshFeed();},60000);
