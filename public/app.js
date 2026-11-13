@@ -90,6 +90,25 @@ function renderAccount() {
  form.onsubmit=async e=>{e.preventDefault();submit.disabled=true;try{state.profile={keywords:keywords.value,region:region.value.trim()};await api('profile','PUT',state.profile);toast(t('profileSaved'));renderCards();}catch(error){toast(error.message);}finally{submit.disabled=false;}};
  box.append(form);const logout=node('button','quiet',t('logout'));logout.onclick=async()=>{try{await api('logout','POST',{});state.user=null;state.saved=[];state.profile={keywords:'',region:''};state.workflow=[];state.matches=false;render();}catch(e){toast(e.message);}};box.append(logout);
 }
+const layoutControl = $('#results-layout');
+function setResultsLayout(layout) {
+ const active = layout === 'list' ? 'list' : 'tiles';
+ $('#tenders').dataset.layout = active;
+ for (const button of layoutControl.querySelectorAll('button')) {
+  const selected = button.dataset.layout === active;
+  button.classList.toggle('active', selected);
+  button.setAttribute('aria-pressed', String(selected));
+ }
+}
+let savedLayout;
+try { savedLayout = localStorage.getItem('bidataResultsLayout'); } catch {}
+setResultsLayout(savedLayout);
+for (const button of layoutControl.querySelectorAll('button')) {
+ button.onclick = () => {
+  setResultsLayout(button.dataset.layout);
+  try { localStorage.setItem('bidataResultsLayout', button.dataset.layout); } catch {}
+ };
+}
 function renderCards() {
  const q=$('#search').value.toLocaleLowerCase();const region=$('#region').value;
  let list=state.tenders.filter(x=>(!q||`${x.title} ${x.buyer} ${x.region}`.toLocaleLowerCase().includes(q))&&(!region||regionKey(x.region)===region)&&(!state.category||x.category===state.category)&&(!state.matches||match(x)));
@@ -115,6 +134,9 @@ function renderPlans() {
  if(state.config.supportEmail){const a=node('a','',t('support'));a.href='mailto:'+state.config.supportEmail;legal.append(a);}
 }
 function render() {
+ layoutControl.setAttribute('aria-label', lang === 'ru' ? 'Вид результатов' : 'Натижалар кўриниши');
+ layoutControl.querySelector('[data-layout="tiles"]').textContent = lang === 'ru' ? 'Плитки' : 'Плиткалар';
+ layoutControl.querySelector('[data-layout="list"]').textContent = lang === 'ru' ? 'Список' : 'Рўйхат';
  document.documentElement.lang=lang==='ru'?'ru':'uz-Cyrl';
  document.querySelectorAll('[data-t]').forEach(el=>el.textContent=t(el.dataset.t));
  document.querySelectorAll('[data-placeholder]').forEach(el=>el.placeholder=t(el.dataset.placeholder));
