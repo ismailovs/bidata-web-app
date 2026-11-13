@@ -119,7 +119,6 @@ $('#language').onclick=()=>{lang=lang==='uz'?'ru':'uz';try{localStorage.setItem(
 $('#search').oninput=renderCards;$('#region').onchange=renderCards;$('#sort').onchange=renderCards;
 $('#matches-toggle').onclick=()=>{if(!state.user)return openAuth();if(!state.profile.keywords.trim()){toast(t('setKeywords'));location.hash='account';return;}state.matches=!state.matches;renderCards();};
 $('#manage-billing').onclick=async()=>{try{const data=await api('portal','POST',{});if(!safeURL(data.url))throw Error('Invalid billing URL');location.assign(data.url);}catch(e){toast(e.message);}};
-$('#refresh').onclick=()=>refreshFeed();
 let installPrompt;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;});
 $('#install').onclick=async()=>{if(installPrompt){await installPrompt.prompt();installPrompt=null;}else $('#install-dialog').showModal();};
@@ -129,7 +128,7 @@ for(const button of document.querySelectorAll('[data-close]'))button.onclick=()=
 window.addEventListener('hashchange',route);
 async function loadAccount(){state.user=await api('me');if(state.user){[state.saved,state.profile,state.workflow]=await Promise.all([api('bookmarks'),api('profile'),api('workflow')]);}else{state.saved=[];state.profile={keywords:'',region:''};state.workflow=[];}}
 let refreshing=false;
-async function refreshFeed(){if(refreshing)return;refreshing=true;$('#refresh').disabled=true;try{const feed=await api('tenders');const old=new Set(state.tenders.map(t=>t.id));const newCount=old.size?feed.tenders.filter(x=>!old.has(x.id)&&(!state.matches||match(x))).length:0;state.tenders=feed.tenders;state.mode=feed.mode;state.updatedAt=feed.updatedAt;state.checked=Date.now();state.error=null;if(newCount)toast(t('newTenders')+' '+newCount);}catch(e){state.tenders=[];state.error=navigator.onLine?e.message:t('offline');}finally{refreshing=false;$('#refresh').disabled=false;render();}}
+async function refreshFeed(){if(refreshing)return;refreshing=true;try{const feed=await api('tenders');const old=new Set(state.tenders.map(t=>t.id));const newCount=old.size?feed.tenders.filter(x=>!old.has(x.id)&&(!state.matches||match(x))).length:0;state.tenders=feed.tenders;state.mode=feed.mode;state.updatedAt=feed.updatedAt;state.checked=Date.now();state.error=null;if(newCount)toast(t('newTenders')+' '+newCount);}catch(e){state.tenders=[];state.error=navigator.onLine?e.message:t('offline');}finally{refreshing=false;render();}}
 async function start(){try{state.config=await api('config');state.mode=state.config.dataMode;await loadAccount();try{state.plans=await api('plans');}catch(e){toast(e.message);}}catch(e){toast(e.message);}await refreshFeed();if(new URLSearchParams(location.search).has('checkout'))toast(t('paymentReturn'));}
 render();start();
 setInterval(()=>{if(document.visibilityState==='visible')refreshFeed();},60000);

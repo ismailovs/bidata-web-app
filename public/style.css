@@ -165,5 +165,3 @@ dialog .quiet { width: 100%; margin-top: 12px; }
 @media (max-width: 760px) {
   .brand-group .header-label { margin-left: 42px; font-size: 10px; }
 }
-
-#sample-label { margin-left: auto; }
