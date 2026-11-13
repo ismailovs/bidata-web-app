@@ -118,7 +118,12 @@ function render() {
  document.documentElement.lang=lang==='ru'?'ru':'uz-Cyrl';
  document.querySelectorAll('[data-t]').forEach(el=>el.textContent=t(el.dataset.t));
  document.querySelectorAll('[data-placeholder]').forEach(el=>el.placeholder=t(el.dataset.placeholder));
- $('#language').textContent=lang==='uz'?'РУ':'ЎЗ';$('#auth-button').textContent=state.user?state.user.email.slice(0,1).toUpperCase():t('signin');
+ const languageLabel = lang === 'uz' ? 'Переключить на русский' : 'Ўзбек тилига ўтиш';
+ for (const [button, label] of [[$('#language'), languageLabel], [$('#install'), t('install').replace(' ↗', '')]]) {
+  button.title = label;
+  button.setAttribute('aria-label', label);
+ }
+ $('#auth-button').textContent=state.user?state.user.email.slice(0,1).toUpperCase():t('signin');
  $('#status-banner').textContent = state.error || '';
  $('#status-banner').hidden = !state.error;
  $('#sample-label').hidden = state.mode === 'live';

@@ -41,7 +41,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .quiet:hover, .avatar:hover { background: var(--hover); }
 .avatar { color: var(--blue); font-weight: 600; }
 #theme-toggle { border-color: #b91c3270; display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
-.theme-icon { font-size: 18px; line-height: 1; }
+#theme-toggle, #language, #install { display: inline-grid; place-items: center; width: 42px; padding: 0; font-size: 20px; line-height: 1; }
 main { max-width: 1170px; margin: auto; padding: 20px 25px 30px; }
 h1 { font-size: clamp(27px, 3vw, 34px); line-height: 1.25; letter-spacing: -.8px; margin: 0 0 10px; }
 h2 { font-size: 20px; letter-spacing: -.3px; line-height: 1.4; }
@@ -128,10 +128,6 @@ dialog .quiet { width: 100%; margin-top: 12px; }
   .sidebar .brand { font-size: 28px; }
   .sidebar .brand-icon { width: 38px; height: 38px; }
   .header-actions { gap: 5px; }
-  .theme-label { display: none; }
-  #theme-toggle, #language { min-width: 40px; padding: 8px; }
-  #install { font-size: 0; padding: 8px; min-width: 40px; }
-  #install::after { content: '↗'; font-size: 20px; }
   .avatar { padding: 8px; }
   main { padding: 25px 16px 110px; }
   h1 { font-size: 28px; letter-spacing: -.6px; }

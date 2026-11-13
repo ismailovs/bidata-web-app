@@ -12,7 +12,6 @@
     button.setAttribute('title', action);
     button.setAttribute('aria-pressed', String(dark));
     button.querySelector('.theme-icon').textContent = dark ? '☾' : '☀';
-    button.querySelector('.theme-label').textContent = ru ? (dark ? 'Тёмная' : 'Светлая') : (dark ? 'Тун' : 'Кун');
   }
   function apply(value) {
     root.dataset.theme = value === 'dark' ? 'dark' : 'light';
