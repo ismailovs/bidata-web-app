@@ -74,7 +74,6 @@ function renderCards() {
  let list=state.tenders.filter(x=>(!q||`${x.title} ${x.buyer} ${x.region}`.toLocaleLowerCase().includes(q))&&(!region||x.region===region)&&(!state.category||x.category===state.category)&&(!state.matches||match(x)));
  list.sort($('#sort').value==='amount' ? (a,b)=>b.amount-a.amount : (a,b)=>Date.parse(a.deadline)-Date.parse(b.deadline));
  $('#tenders').replaceChildren(...(list.length ? list.map(x=>card(x)) : [node('div','empty',state.error || t('empty'))]));
- $('#metric-count').textContent=list.length;$('#metric-value').textContent=money(list.reduce((s,x)=>s+x.amount,0));$('#metric-saved').textContent=state.saved.length;
  const saved=state.tenders.filter(x=>state.saved.includes(x.id));
  $('#saved-tenders').replaceChildren(...(!state.user ? [node('div','empty',t('loginneeded'))] : saved.length ? saved.map(x=>card(x,true)) : [node('div','empty',t('nosaved'))]));
  $('#matches-toggle').classList.toggle('active',state.matches);$('#matches-toggle').setAttribute('aria-pressed',String(state.matches));

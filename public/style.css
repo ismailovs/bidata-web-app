@@ -49,13 +49,7 @@ h2 { font-size: 20px; letter-spacing: -.3px; line-height: 1.4; }
 .subtitle { color: var(--muted); margin: 0 0 22px; font-size: 14px; }
 .intro { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
 .notice { font-size: 12px; border: 1px solid var(--notice-edge); background: var(--notice-bg); color: var(--notice-text); border-radius: 8px; padding: 10px 14px; margin: 0 0 22px; }
-.metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 22px 0 30px; }
-.metrics article { background: var(--surface); border: 1px solid var(--edge); border-radius: 10px; padding: 16px 20px; display: flex; flex-direction: column; }
-.metrics article > span { font-size: 12px; color: var(--muted); }
-.metrics strong { font-size: 27px; letter-spacing: -.5px; line-height: 1.6; font-weight: 650; }
-.metrics small, .metrics a { font-size: 11px; color: var(--muted); }
-.metrics a { color: var(--blue); }
-.section-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.section-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
 .section-heading h2 { margin: 0; }
 .filters { display: flex; gap: 10px; }
 .search { display: flex; gap: 10px; align-items: center; flex: 1; background: var(--surface); border: 1px solid var(--edge); padding: 0 14px; border-radius: 8px; }
@@ -142,11 +136,6 @@ dialog .quiet { width: 100%; margin-top: 12px; }
   main { padding: 25px 16px 110px; }
   h1 { font-size: 28px; letter-spacing: -.6px; }
   .subtitle { font-size: 13px; }
-  .metrics { gap: 9px; margin: 20px 0 25px; grid-template-columns: repeat(2, 1fr); }
-  .metrics article { padding: 14px; }
-  .metrics article > span { font-size: 11px; }
-  .metrics strong { font-size: 25px; }
-  .metrics .accent-metric { display: none; }
   .notice { font-size: 11px; padding: 10px 12px; }
   .tender-grid { grid-template-columns: 1fr; }
   .section-heading h2 { font-size: 19px; }
@@ -176,3 +165,5 @@ dialog .quiet { width: 100%; margin-top: 12px; }
 @media (max-width: 760px) {
   .brand-group .header-label { margin-left: 42px; font-size: 10px; }
 }
+
+#sample-label { margin-left: auto; }
