@@ -10,6 +10,27 @@ const translations = {
 let lang; try { lang = localStorage.getItem('bidataLanguage') || 'uz'; } catch { lang = 'uz'; }
 if (!translations[lang]) lang = 'uz';
 const t = key => translations[lang][key] || key;
+const regions = [
+ ['andijan', 'Андижон вилояти', 'Андижанская область', 'Андижон|Андижан|Andijon|Andijan'],
+ ['bukhara', 'Бухоро вилояти', 'Бухарская область', 'Бухоро|Бухара|Buxoro|Bukhara'],
+ ['fergana', 'Фарғона вилояти', 'Ферганская область', 'Фарғона|Фергана|Fargona|Fergana'],
+ ['jizzakh', 'Жиззах вилояти', 'Джизакская область', 'Жиззах|Джизак|Jizzax|Jizzakh'],
+ ['karakalpakstan', 'Қорақалпоғистон Республикаси', 'Республика Каракалпакстан', 'Қорақалпоғистон|Каракалпакстан|Qoraqalpogiston|Karakalpakstan'],
+ ['kashkadarya', 'Қашқадарё вилояти', 'Кашкадарьинская область', 'Қашқадарё|Кашкадарья|Qashqadaryo|Kashkadarya'],
+ ['khorezm', 'Хоразм вилояти', 'Хорезмская область', 'Хоразм|Хорезм|Xorazm|Khorezm'],
+ ['namangan', 'Наманган вилояти', 'Наманганская область', 'Наманган|Namangan'],
+ ['navoi', 'Навоий вилояти', 'Навоийская область', 'Навоий|Навои|Navoiy|Navoi'],
+ ['samarkand', 'Самарқанд вилояти', 'Самаркандская область', 'Самарқанд|Самарканд|Samarqand|Samarkand'],
+ ['syrdarya', 'Сирдарё вилояти', 'Сырдарьинская область', 'Сирдарё|Сырдарья|Sirdaryo|Syrdarya'],
+ ['surkhandarya', 'Сурхондарё вилояти', 'Сурхандарьинская область', 'Сурхондарё|Сурхандарья|Surxondaryo|Surkhandarya'],
+ ['tashkent-city', 'Тошкент шаҳри', 'город Ташкент', 'Тошкент|Ташкент|Toshkent|Tashkent|Toshkent shahri|Tashkent city|г. Ташкент'],
+ ['tashkent-region', 'Тошкент вилояти', 'Ташкентская область', 'Toshkent viloyati|Tashkent region|Ташкентская обл.']
+];
+function regionKey(value) {
+ const normalize = text => text.toLocaleLowerCase().replace(/['’ʻʼ‘]/g, '').trim();
+ const name = normalize(value);
+ return regions.find(([id, uz, ru, aliases]) => [id, uz, ru, ...aliases.split('|')].some(label => normalize(label) === name))?.[0] || value;
+}
 const state = { user:null, tenders:[], saved:[], workflow:[], profile:{keywords:'',region:''}, category:'', matches:false, mode:'sample', config:{}, plans:[], error:null, updatedAt:null, checked:null };
 const node = (tag, className, text) => { const n = document.createElement(tag); if (className) n.className = className; if (text !== undefined) n.textContent = text; return n; };
 async function api(path, method = 'GET', body) {
@@ -71,7 +92,7 @@ function renderAccount() {
 }
 function renderCards() {
  const q=$('#search').value.toLocaleLowerCase();const region=$('#region').value;
- let list=state.tenders.filter(x=>(!q||`${x.title} ${x.buyer} ${x.region}`.toLocaleLowerCase().includes(q))&&(!region||x.region===region)&&(!state.category||x.category===state.category)&&(!state.matches||match(x)));
+ let list=state.tenders.filter(x=>(!q||`${x.title} ${x.buyer} ${x.region}`.toLocaleLowerCase().includes(q))&&(!region||regionKey(x.region)===region)&&(!state.category||x.category===state.category)&&(!state.matches||match(x)));
  list.sort($('#sort').value==='amount' ? (a,b)=>b.amount-a.amount : (a,b)=>Date.parse(a.deadline)-Date.parse(b.deadline));
  $('#tenders').replaceChildren(...(list.length ? list.map(x=>card(x)) : [node('div','empty',state.error || t('empty'))]));
  const saved=state.tenders.filter(x=>state.saved.includes(x.id));
@@ -104,7 +125,18 @@ function render() {
  $('#sample-label').textContent = lang === 'ru' ? 'Примеры тендеров' : 'Намуна тендерлар';
  $('#freshness').textContent=state.checked ? (state.updatedAt?t('updated')+' '+new Date(state.updatedAt).toLocaleString():t('checked')+' '+new Date(state.checked).toLocaleTimeString()) : '';
  const old=$('#region').value;$('#region').replaceChildren();const first=node('option','',t('regions'));first.value='';$('#region').append(first);
- for(const r of [...new Set(state.tenders.map(x=>x.region))]){const opt=node('option','',r);opt.value=r;$('#region').append(opt);}$('#region').value=old;
+ for (const [id, uz, ru] of regions) {
+  const option = node('option', '', lang === 'ru' ? ru : uz);
+  option.value = id;
+  $('#region').append(option);
+ }
+ for (const name of new Set(state.tenders.map(x => x.region))) {
+  if (regions.some(([id]) => id === regionKey(name))) continue;
+  const option = node('option', '', name);
+  option.value = name;
+  $('#region').append(option);
+ }
+ $('#region').value = [...$('#region').options].some(option => option.value === old) ? old : '';
  $('#categories').replaceChildren();
  for(const category of ['',...new Set(state.tenders.map(x=>x.category))]){const b=node('button','chip'+(category===state.category?' active':''),category||t('all'));b.setAttribute('aria-pressed',String(category===state.category));b.onclick=()=>{state.category=category;render();};$('#categories').append(b);}
  renderCards();renderPlans();renderAccount();renderAuth();route();document.dispatchEvent(new Event('bidata:language'));
