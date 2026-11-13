@@ -135,8 +135,13 @@ function renderPlans() {
 }
 function render() {
  layoutControl.setAttribute('aria-label', lang === 'ru' ? 'Вид результатов' : 'Натижалар кўриниши');
- layoutControl.querySelector('[data-layout="tiles"]').textContent = lang === 'ru' ? 'Плитки' : 'Плиткалар';
- layoutControl.querySelector('[data-layout="list"]').textContent = lang === 'ru' ? 'Список' : 'Рўйхат';
+ for (const button of layoutControl.querySelectorAll('button')) {
+  const label = button.dataset.layout === 'tiles'
+   ? (lang === 'ru' ? 'Плитки' : 'Плиткалар')
+   : (lang === 'ru' ? 'Список' : 'Рўйхат');
+  button.title = label;
+  button.setAttribute('aria-label', label);
+ }
  document.documentElement.lang=lang==='ru'?'ru':'uz-Cyrl';
  document.querySelectorAll('[data-t]').forEach(el=>el.textContent=t(el.dataset.t));
  document.querySelectorAll('[data-placeholder]').forEach(el=>el.placeholder=t(el.dataset.placeholder));
