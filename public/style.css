@@ -107,6 +107,7 @@ dialog .quiet { width: 100%; margin-top: 12px; }
 .detail-row { border-top: 1px solid var(--edge); padding: 12px 0; display: flex; justify-content: space-between; gap: 20px; font-size: 13px; }
 .detail-row span { color: var(--muted); }
 .productivity { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 16px 0 0; }
+.productivity .configure-link { display: inline-flex; align-items: center; font-size: inherit; }
 .productivity .active { border-color: var(--blue); color: var(--blue); background: var(--active); }
 #freshness { margin-left: auto; font-size: 11px; }
 .workflow-select { font-size: 12px; width: 100%; margin-top: 6px; }

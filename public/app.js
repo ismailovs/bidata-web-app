@@ -154,8 +154,6 @@ function render() {
  $('#auth-button').textContent=state.user?state.user.email.slice(0,1).toUpperCase():t('signin');
  $('#status-banner').textContent = state.error || '';
  $('#status-banner').hidden = !state.error;
- $('#sample-label').hidden = state.mode === 'live';
- $('#sample-label').textContent = lang === 'ru' ? 'Примеры тендеров' : 'Намуна тендерлар';
  $('#freshness').textContent=state.checked ? (state.updatedAt?t('updated')+' '+new Date(state.updatedAt).toLocaleString():t('checked')+' '+new Date(state.checked).toLocaleTimeString()) : '';
  const old=$('#region').value;$('#region').replaceChildren();const first=node('option','',t('regions'));first.value='';$('#region').append(first);
  for (const [id, uz, ru] of regions) {
