@@ -187,3 +187,18 @@ dialog .quiet { width: 100%; margin-top: 12px; }
   .sidebar .brand-group { justify-self: start; }
   .sidebar .header-actions { justify-self: end; }
 }
+
+@media (min-width: 1000px) {
+  #tenders[data-layout="list"] .tender {
+    display: grid;
+    grid-template-columns: 44px calc(47% - 56px) minmax(0, 1fr) 190px 96px;
+  }
+  #tenders[data-layout="list"] .amount {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-variant-numeric: tabular-nums;
+  }
+  #tenders[data-layout="list"] .card-meta { flex-wrap: nowrap; }
+  #tenders[data-layout="list"] .card-meta > :first-child { overflow: hidden; text-overflow: ellipsis; }
+  #tenders[data-layout="list"] .card-bottom { justify-content: flex-end; }
+}
