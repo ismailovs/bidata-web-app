@@ -118,6 +118,7 @@ function render() {
  document.documentElement.lang=lang==='ru'?'ru':'uz-Cyrl';
  document.querySelectorAll('[data-t]').forEach(el=>el.textContent=t(el.dataset.t));
  document.querySelectorAll('[data-placeholder]').forEach(el=>el.placeholder=t(el.dataset.placeholder));
+ $('#language span').textContent = lang === 'uz' ? 'РУС' : 'УЗ';
  const languageLabel = lang === 'uz' ? 'Переключить на русский' : 'Ўзбек тилига ўтиш';
  for (const [button, label] of [[$('#language'), languageLabel], [$('#install'), t('install').replace(' ↗', '')]]) {
   button.title = label;
